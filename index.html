@@ -17,7 +17,7 @@
 </head>
 <body class="bg-[#0b0f19] text-slate-200 min-h-screen">
 
-<!-- LOGIN -->
+<!-- LOGIN SECTION -->
 <div id="login" class="min-h-screen flex items-center justify-center p-6">
   <div class="glass rounded-3xl p-8 w-full max-w-md shadow-2xl shadow-blue-900/20">
     <div class="text-center mb-6">
@@ -28,18 +28,18 @@
     <form onsubmit="event.preventDefault(); doLogin();" class="space-y-4">
       <div>
         <label class="block text-xs font-semibold text-slate-400 mb-1">Username</label>
-        <input id="u" type="text" placeholder="Masukkan username" class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition" autocomplete="off" />
+        <input id="u" type="text" placeholder="Masukkan username" class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition text-white" autocomplete="off" />
       </div>
       <div>
         <label class="block text-xs font-semibold text-slate-400 mb-1">Password</label>
-        <input id="p" type="password" placeholder="Masukkan password" class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition" />
+        <input id="p" type="password" placeholder="Masukkan password" class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition text-white" />
       </div>
       <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold shadow-lg shadow-blue-900/30 transition">Masuk Sistem</button>
     </form>
   </div>
 </div>
 
-<!-- APP -->
+<!-- MAIN APP SECTION -->
 <div id="app" class="hidden min-h-screen flex flex-col md:flex-row">
   <aside class="w-full md:w-72 glass md:h-screen md:sticky md:top-0 md:overflow-y-auto shrink-0 border-r border-slate-800">
     <div class="p-6 md:p-8">
@@ -71,7 +71,7 @@
       </div>
     </header>
 
-    <!-- Dashboard -->
+    <!-- Tab Dashboard -->
     <section id="tab-dashboard" class="space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="glass rounded-2xl p-6">
@@ -113,20 +113,30 @@
       </div>
     </section>
 
-    <!-- Borrow -->
+    <!-- Tab Form Pinjam -->
     <section id="tab-borrow" class="hidden space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-1 glass rounded-2xl p-6 flex flex-col">
           <h2 class="text-lg font-bold mb-3 text-white">Pindai QR Aset</h2>
-          <div class="relative w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex-1 min-h-[240px] flex items-center justify-center">
+          
+          <!-- Dropdown Pilih Kamera (Universal Laptop & HP) -->
+          <div class="mb-3">
+            <label class="block text-[11px] text-slate-400 font-semibold mb-1">Pilih Kamera:</label>
+            <select id="camera-select-borrow" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white" onchange="changeCamera('borrow')">
+              <option value="">Aktifkan kamera terlebih dahulu...</option>
+            </select>
+          </div>
+
+          <div class="relative w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex-1 min-h-[200px] flex items-center justify-center">
             <div id="reader" class="w-full h-full"></div>
             <div id="cam-permission-overlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-20">
-              <p class="text-xs text-slate-400 mb-3">Izinkan kamera untuk scan QR.</p>
+              <p class="text-xs text-slate-400 mb-3">Izinkan akses kamera untuk memindai QR.</p>
               <button onclick="initCamera('borrow')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold">Aktifkan Kamera</button>
             </div>
           </div>
           <button onclick="stopScanner()" class="mt-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">Matikan Kamera</button>
         </div>
+        
         <div class="lg:col-span-2 glass rounded-2xl p-6">
           <h2 class="text-lg font-bold mb-4 text-white">Form Peminjaman Barang</h2>
           <form onsubmit="event.preventDefault(); submitBorrow();" class="space-y-4">
@@ -149,20 +159,30 @@
       </div>
     </section>
 
-    <!-- Return -->
+    <!-- Tab Form Kembali -->
     <section id="tab-return" class="hidden space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-1 glass rounded-2xl p-6 flex flex-col">
           <h2 class="text-lg font-bold mb-3 text-white">Scan Pengembalian</h2>
-          <div class="relative w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex-1 min-h-[240px] flex items-center justify-center">
+          
+          <!-- Dropdown Pilih Kamera (Universal Laptop & HP) -->
+          <div class="mb-3">
+            <label class="block text-[11px] text-slate-400 font-semibold mb-1">Pilih Kamera:</label>
+            <select id="camera-select-return" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white" onchange="changeCamera('return')">
+              <option value="">Aktifkan kamera terlebih dahulu...</option>
+            </select>
+          </div>
+
+          <div class="relative w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex-1 min-h-[200px] flex items-center justify-center">
             <div id="reader-return" class="w-full h-full"></div>
             <div id="cam-permission-overlay-return" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-20">
-              <p class="text-xs text-slate-400 mb-3">Izinkan kamera untuk scan QR.</p>
+              <p class="text-xs text-slate-400 mb-3">Izinkan akses kamera untuk memindai QR.</p>
               <button onclick="initCamera('return')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold">Aktifkan Kamera</button>
             </div>
           </div>
           <button onclick="stopScanner()" class="mt-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">Matikan Kamera</button>
         </div>
+        
         <div class="lg:col-span-2 glass rounded-2xl p-6">
           <h2 class="text-lg font-bold mb-4 text-white">Form Pengembalian Barang</h2>
           <form onsubmit="event.preventDefault(); submitReturn();" class="space-y-4">
@@ -179,11 +199,17 @@
   </main>
 </div>
 
+<!-- JAVASCRIPT UTAMA -->
 <script>
 // GANTI URL DI BAWAH DENGAN URL DEPLOYMENT WEB APP GOOGLE APPS SCRIPT ANDA
-const API_URL = "https://script.google.com/macros/s/AKfycbwqVMiQ0-gFlWAJ-ZC3rEol8kGHN-J6mzuxMg0c38v2aae7aUNlnzws17oHClvem7tS/exec"; 
-
+const API_URL = "https://script.google.com/macros/s/AKfycbwqVMiQ0-gFlWAJ-ZC3rEol8kGHN-J6mzuxMg0c38v2aae7aUNlnzws17oHClvem7tS/exec";
 let html5QrCode = null;
+
+// Update waktu sistem real-time
+setInterval(() => {
+  const now = new Date();
+  document.getElementById('sys-time').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' ' + now.toLocaleTimeString('id-ID');
+}, 1000);
 
 function showTab(tab) {
   stopScanner();
@@ -267,25 +293,104 @@ function refreshDashboard() {
   .catch(err => console.error("Error fetching assets:", err));
 }
 
+// Inisialisasi Kamera Universal (Support Laptop, Webcam Eksternal, & Kamera HP)
 function initCamera(mode) {
   stopScanner();
   const overlayId = mode === 'borrow' ? 'cam-permission-overlay' : 'cam-permission-overlay-return';
   const elementId = mode === 'borrow' ? 'reader' : 'reader-return';
+  const selectId = mode === 'borrow' ? 'camera-select-borrow' : 'camera-select-return';
+  
   document.getElementById(overlayId).style.display = 'none';
-
   html5QrCode = new Html5Qrcode(elementId);
-  html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 200, height: 200 } }, (text) => {
-    if (mode === 'borrow') document.getElementById('borrow-code').value = text;
-    else document.getElementById('return-code').value = text;
-    stopScanner();
+
+  Html5Qrcode.getCameras().then(devices => {
+    if (devices && devices.length) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '';
+      
+      devices.forEach((device, index) => {
+        const option = document.createElement('option');
+        option.value = device.id;
+        option.text = device.label || `Kamera ${index + 1}`;
+        select.appendChild(option);
+      });
+
+      // Pilih kamera belakang secara default jika di HP, atau kamera pertama jika di Laptop
+      let selectedCamId = devices[0].id;
+      for (let device of devices) {
+        const label = device.label.toLowerCase();
+        if (label.includes('back') || label.includes('rear') || label.includes('belakang') || label.includes('environment')) {
+          selectedCamId = device.id;
+          select.value = selectedCamId;
+          break;
+        }
+      }
+
+      startScannerStream(selectedCamId, mode, elementId, overlayId);
+    } else {
+      alert("Tidak ada perangkat kamera yang terdeteksi.");
+      document.getElementById(overlayId).style.display = 'flex';
+    }
   }).catch(err => {
+    console.error("Gagal mendapatkan daftar kamera:", err);
+    startFallbackMode(elementId, overlayId, mode);
+  });
+}
+
+function startScannerStream(cameraId, mode, elementId, overlayId) {
+  html5QrCode.start(
+    cameraId,
+    { fps: 10, qrbox: { width: 200, height: 200 } },
+    (text) => {
+      if (mode === 'borrow') document.getElementById('borrow-code').value = text;
+      else document.getElementById('return-code').value = text;
+      stopScanner();
+    },
+    (err) => {}
+  ).catch(err => {
+    console.error("Gagal memulai stream kamera:", err);
     document.getElementById(overlayId).style.display = 'flex';
+  });
+}
+
+function changeCamera(mode) {
+  const selectId = mode === 'borrow' ? 'camera-select-borrow' : 'camera-select-return';
+  const newCamId = document.getElementById(selectId).value;
+  const elementId = mode === 'borrow' ? 'reader' : 'reader-return';
+  const overlayId = mode === 'borrow' ? 'cam-permission-overlay' : 'cam-permission-overlay-return';
+
+  if (html5QrCode && html5QrCode.isScanning) {
+    html5QrCode.stop().then(() => {
+      startScannerStream(newCamId, mode, elementId, overlayId);
+    }).catch(err => console.error(err));
+  } else {
+    startScannerStream(newCamId, mode, elementId, overlayId);
+  }
+}
+
+function startFallbackMode(elementId, overlayId, mode) {
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 200, height: 200 } },
+    (text) => {
+      if (mode === 'borrow') document.getElementById('borrow-code').value = text;
+      else document.getElementById('return-code').value = text;
+      stopScanner();
+    },
+    (err) => {}
+  ).catch(err => {
+    document.getElementById(overlayId).style.display = 'flex';
+    alert("Gagal mengakses kamera. Periksa izin akses browser Anda.");
   });
 }
 
 function stopScanner() {
   if (html5QrCode) {
-    html5QrCode.stop().then(() => html5QrCode.clear()).catch(e => {});
+    if (html5QrCode.isScanning) {
+      html5QrCode.stop().then(() => {
+        try { html5QrCode.clear(); } catch(e){}
+      }).catch(e => {});
+    }
     html5QrCode = null;
   }
   ['cam-permission-overlay', 'cam-permission-overlay-return'].forEach(id => {
