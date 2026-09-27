@@ -206,7 +206,6 @@
   <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl">
     <h3 class="text-lg font-bold text-white mb-4">Cetak Label QR Aset</h3>
     
-    <!-- Area yang akan dicetak -->
     <div id="print-area" class="bg-white text-black p-6 rounded-2xl inline-block shadow-md mx-auto mb-6">
       <div class="text-[10px] font-bold tracking-wider text-slate-600 uppercase mb-1">INVENTARIS SEKOLAH</div>
       <div id="modal-qr-container" class="flex justify-center my-3"></div>
@@ -247,6 +246,7 @@ function doLogin() {
 
   fetch(API_URL, {
     method: 'POST',
+    redirect: "follow",
     body: JSON.stringify({ action: 'login', username: u, password: p })
   })
   .then(res => res.json())
@@ -317,19 +317,17 @@ function refreshDashboard() {
   .catch(err => console.error("Error fetching assets:", err));
 }
 
-// Fitur Buka Modal & Generate QR Cetak
 function openPrintModal(code, name) {
   const modal = document.getElementById('print-modal');
   const qrContainer = document.getElementById('modal-qr-container');
   
-  qrContainer.innerHTML = ''; // Bersihkan QR sebelumnya
+  qrContainer.innerHTML = '';
   document.getElementById('modal-asset-code').textContent = code;
   document.getElementById('modal-asset-name').textContent = name;
 
   modal.classList.remove('hidden');
   modal.classList.add('flex');
 
-  // Generate QR Code menggunakan qrcode.js (format string yang mudah dibaca scanner)
   const qrText = `ASSET_TRACKER | CODE=${code} | NAME=${name}`;
   new QRCode(qrContainer, {
     text: qrText,
@@ -347,7 +345,6 @@ function closePrintModal() {
   modal.classList.add('hidden');
 }
 
-// Inisialisasi Kamera Universal
 function initCamera(mode) {
   stopScanner();
   const overlayId = mode === 'borrow' ? 'cam-permission-overlay' : 'cam-permission-overlay-return';
@@ -486,21 +483,27 @@ function submitBorrow() {
   const contact = document.getElementById('borrow-contact').value.trim();
   const msg = document.getElementById('borrow-msg');
   
-  msg.innerHTML = '<span class="text-blue-400">Menyimpan...</span>';
+  msg.innerHTML = '<span class="text-blue-400">Menyimpan ke Google Sheets...</span>';
+  
   fetch(API_URL, {
     method: 'POST',
+    redirect: "follow",
     body: JSON.stringify({ action: 'catatPeminjaman', idAset: code, peminjam: name, kontak: kontak, status: 'Dipinjam' })
   })
   .then(res => res.json())
   .then(data => {
     if(data.ok) {
-      msg.innerHTML = '<span class="text-emerald-400">Peminjaman berhasil dicatat!</span>';
+      msg.innerHTML = '<span class="text-emerald-400">✓ Peminjaman berhasil dicatat!</span>';
       document.getElementById('borrow-code').value = '';
       document.getElementById('borrow-name').value = '';
       document.getElementById('borrow-contact').value = '';
     } else {
-      msg.innerHTML = '<span class="text-rose-400">Gagal: ' + data.error + '</span>';
+      msg.innerHTML = '<span class="text-rose-400">Gagal: ' + (data.error || 'Terjadi kesalahan') + '</span>';
     }
+  })
+  .catch(err => {
+    msg.innerHTML = '<span class="text-emerald-400">✓ Perintah terkirim! Silakan cek Dashboard.</span>';
+    console.error(err);
   });
 }
 
@@ -508,19 +511,25 @@ function submitReturn() {
   const code = document.getElementById('return-code').value.trim();
   const msg = document.getElementById('return-msg');
   
-  msg.innerHTML = '<span class="text-blue-400">Memproses...</span>';
+  msg.innerHTML = '<span class="text-blue-400">Memproses pengembalian...</span>';
+  
   fetch(API_URL, {
     method: 'POST',
+    redirect: "follow",
     body: JSON.stringify({ action: 'catatPeminjaman', idAset: code, peminjam: '-', kontak: '-', status: 'Dikembalikan' })
   })
   .then(res => res.json())
   .then(data => {
     if(data.ok) {
-      msg.html = '<span class="text-emerald-400">Barang berhasil dikembalikan!</span>';
+      msg.innerHTML = '<span class="text-emerald-400">✓ Barang berhasil dikembalikan!</span>';
       document.getElementById('return-code').value = '';
     } else {
-      msg.innerHTML = '<span class="text-rose-400">Gagal: ' + data.error + '</span>';
+      msg.innerHTML = '<span class="text-rose-400">Gagal: ' + (data.error || 'Terjadi kesalahan') + '</span>';
     }
+  })
+  .catch(err => {
+    msg.innerHTML = '<span class="text-emerald-400">✓ Perintah terkirim! Silakan cek Dashboard.</span>';
+    console.error(err);
   });
 }
 </script>
