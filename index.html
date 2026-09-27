@@ -6,6 +6,7 @@
 <title>Asset Tracker — Sekolah</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
   body { font-family: 'Inter', sans-serif; }
@@ -13,6 +14,12 @@
   ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-track { background: #0b0f19; }
   ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  
+  @media print {
+    body * { visibility: hidden; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area { position: absolute; left: 0; top: 0; width: 100%; background: white; color: black; }
+  }
 </style>
 </head>
 <body class="bg-[#0b0f19] text-slate-200 min-h-screen">
@@ -103,10 +110,11 @@
                 <th class="px-4 py-3">Status</th>
                 <th class="px-4 py-3">Kondisi</th>
                 <th class="px-4 py-3">Dipinjam Oleh</th>
+                <th class="px-4 py-3 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody id="asset-table-body" class="divide-y divide-white/5">
-              <tr><td colspan="6" class="px-4 py-4 text-center text-slate-500">Memuat data aset...</td></tr>
+              <tr><td colspan="7" class="px-4 py-4 text-center text-slate-500">Memuat data aset...</td></tr>
             </tbody>
           </table>
         </div>
@@ -118,15 +126,12 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-1 glass rounded-2xl p-6 flex flex-col">
           <h2 class="text-lg font-bold mb-3 text-white">Pindai QR Aset</h2>
-          
-          <!-- Dropdown Pilih Kamera (Universal Laptop & HP) -->
           <div class="mb-3">
             <label class="block text-[11px] text-slate-400 font-semibold mb-1">Pilih Kamera:</label>
             <select id="camera-select-borrow" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white" onchange="changeCamera('borrow')">
               <option value="">Aktifkan kamera terlebih dahulu...</option>
             </select>
           </div>
-
           <div class="relative w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex-1 min-h-[200px] flex items-center justify-center">
             <div id="reader" class="w-full h-full"></div>
             <div id="cam-permission-overlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-20">
@@ -164,15 +169,12 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-1 glass rounded-2xl p-6 flex flex-col">
           <h2 class="text-lg font-bold mb-3 text-white">Scan Pengembalian</h2>
-          
-          <!-- Dropdown Pilih Kamera (Universal Laptop & HP) -->
           <div class="mb-3">
             <label class="block text-[11px] text-slate-400 font-semibold mb-1">Pilih Kamera:</label>
             <select id="camera-select-return" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white" onchange="changeCamera('return')">
               <option value="">Aktifkan kamera terlebih dahulu...</option>
             </select>
           </div>
-
           <div class="relative w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex-1 min-h-[200px] flex items-center justify-center">
             <div id="reader-return" class="w-full h-full"></div>
             <div id="cam-permission-overlay-return" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-20">
@@ -199,13 +201,32 @@
   </main>
 </div>
 
+<!-- MODAL / AREA CETAK QR -->
+<div id="print-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+  <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl">
+    <h3 class="text-lg font-bold text-white mb-4">Cetak Label QR Aset</h3>
+    
+    <!-- Area yang akan dicetak -->
+    <div id="print-area" class="bg-white text-black p-6 rounded-2xl inline-block shadow-md mx-auto mb-6">
+      <div class="text-[10px] font-bold tracking-wider text-slate-600 uppercase mb-1">INVENTARIS SEKOLAH</div>
+      <div id="modal-qr-container" class="flex justify-center my-3"></div>
+      <div id="modal-asset-code" class="font-mono font-extrabold text-sm text-black"></div>
+      <div id="modal-asset-name" class="text-xs text-slate-700 font-medium mt-0.5"></div>
+    </div>
+
+    <div class="flex gap-3">
+      <button onclick="window.print()" class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs">Cetak Sekarang</button>
+      <button onclick="closePrintModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">Tutup</button>
+    </div>
+  </div>
+</div>
+
 <!-- JAVASCRIPT UTAMA -->
 <script>
-// GANTI URL DI BAWAH DENGAN URL DEPLOYMENT WEB APP GOOGLE APPS SCRIPT ANDA
-const API_URL = "https://script.google.com/macros/s/AKfycbwqVMiQ0-gFlWAJ-ZC3rEol8kGHN-J6mzuxMg0c38v2aae7aUNlnzws17oHClvem7tS/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwqVMiQ0-gFlWAJ-ZC3rEol8kGHN-J6mzuxMg0c38v2aae7aUNlnzws17oHClvem7tS/exec"; 
+
 let html5QrCode = null;
 
-// Update waktu sistem real-time
 setInterval(() => {
   const now = new Date();
   document.getElementById('sys-time').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' ' + now.toLocaleTimeString('id-ID');
@@ -266,7 +287,7 @@ function refreshDashboard() {
     let total=0, avail=0, borrow=0;
 
     if(!rows || rows.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-slate-500">Tidak ada data aset.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-slate-500">Tidak ada data aset.</td></tr>';
       return;
     }
 
@@ -283,6 +304,9 @@ function refreshDashboard() {
           <td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${isAvail ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">${r[3]}</span></td>
           <td class="px-4 py-3 text-slate-300">${r[4]}</td>
           <td class="px-4 py-3 text-slate-300 text-xs">${r[5]}</td>
+          <td class="px-4 py-3 text-center">
+            <button onclick="openPrintModal('${r[0]}', '${r[1]}')" class="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 text-xs font-bold transition">Cetak QR</button>
+          </td>
         </tr>
       `);
     });
@@ -293,7 +317,37 @@ function refreshDashboard() {
   .catch(err => console.error("Error fetching assets:", err));
 }
 
-// Inisialisasi Kamera Universal (Support Laptop, Webcam Eksternal, & Kamera HP)
+// Fitur Buka Modal & Generate QR Cetak
+function openPrintModal(code, name) {
+  const modal = document.getElementById('print-modal');
+  const qrContainer = document.getElementById('modal-qr-container');
+  
+  qrContainer.innerHTML = ''; // Bersihkan QR sebelumnya
+  document.getElementById('modal-asset-code').textContent = code;
+  document.getElementById('modal-asset-name').textContent = name;
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  // Generate QR Code menggunakan qrcode.js (format string yang mudah dibaca scanner)
+  const qrText = `ASSET_TRACKER | CODE=${code} | NAME=${name}`;
+  new QRCode(qrContainer, {
+    text: qrText,
+    width: 140,
+    height: 140,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+  });
+}
+
+function closePrintModal() {
+  const modal = document.getElementById('print-modal');
+  modal.classList.remove('flex');
+  modal.classList.add('hidden');
+}
+
+// Inisialisasi Kamera Universal
 function initCamera(mode) {
   stopScanner();
   const overlayId = mode === 'borrow' ? 'cam-permission-overlay' : 'cam-permission-overlay-return';
@@ -315,7 +369,6 @@ function initCamera(mode) {
         select.appendChild(option);
       });
 
-      // Pilih kamera belakang secara default jika di HP, atau kamera pertama jika di Laptop
       let selectedCamId = devices[0].id;
       for (let device of devices) {
         const label = device.label.toLowerCase();
@@ -342,8 +395,22 @@ function startScannerStream(cameraId, mode, elementId, overlayId) {
     cameraId,
     { fps: 10, qrbox: { width: 200, height: 200 } },
     (text) => {
-      if (mode === 'borrow') document.getElementById('borrow-code').value = text;
-      else document.getElementById('return-code').value = text;
+      let finalCode = text;
+      if (text.includes("CODE=")) {
+        const parts = text.split("|");
+        for (let part of parts) {
+          if (part.trim().startsWith("CODE=")) {
+            finalCode = part.trim().replace("CODE=", "");
+            break;
+          }
+        }
+      }
+
+      if (mode === 'borrow') {
+        document.getElementById('borrow-code').value = finalCode;
+      } else {
+        document.getElementById('return-code').value = finalCode;
+      }
       stopScanner();
     },
     (err) => {}
@@ -373,8 +440,22 @@ function startFallbackMode(elementId, overlayId, mode) {
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 200, height: 200 } },
     (text) => {
-      if (mode === 'borrow') document.getElementById('borrow-code').value = text;
-      else document.getElementById('return-code').value = text;
+      let finalCode = text;
+      if (text.includes("CODE=")) {
+        const parts = text.split("|");
+        for (let part of parts) {
+          if (part.trim().startsWith("CODE=")) {
+            finalCode = part.trim().replace("CODE=", "");
+            break;
+          }
+        }
+      }
+
+      if (mode === 'borrow') {
+        document.getElementById('borrow-code').value = finalCode;
+      } else {
+        document.getElementById('return-code').value = finalCode;
+      }
       stopScanner();
     },
     (err) => {}
@@ -408,7 +489,7 @@ function submitBorrow() {
   msg.innerHTML = '<span class="text-blue-400">Menyimpan...</span>';
   fetch(API_URL, {
     method: 'POST',
-    body: JSON.stringify({ action: 'catatPeminjaman', idAset: code, peminjam: name, kontak: contact, status: 'Dipinjam' })
+    body: JSON.stringify({ action: 'catatPeminjaman', idAset: code, peminjam: name, kontak: kontak, status: 'Dipinjam' })
   })
   .then(res => res.json())
   .then(data => {
@@ -435,7 +516,7 @@ function submitReturn() {
   .then(res => res.json())
   .then(data => {
     if(data.ok) {
-      msg.innerHTML = '<span class="text-emerald-400">Barang berhasil dikembalikan!</span>';
+      msg.html = '<span class="text-emerald-400">Barang berhasil dikembalikan!</span>';
       document.getElementById('return-code').value = '';
     } else {
       msg.innerHTML = '<span class="text-rose-400">Gagal: ' + data.error + '</span>';
