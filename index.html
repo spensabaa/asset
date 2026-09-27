@@ -1,45 +1,342 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ASSET TRACER SMPN 1 BANGSAL</title>
-  <link rel="icon" href="https://drive.google.com/file/d/1WS-LiAfX4qxX-UNRxXw_NgcZiXTVMI2M/view?usp=sharing" />
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      background-color: #eee;
-      overflow: hidden; /* Mencegah scroll ganda */
-    }
-
-    .iframe-container {
-      width: 100%;
-      height: 100dvh; /* Menggunakan dvh agar pas di mobile browser */
-      overflow: hidden;
-    }
-
-    iframe {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asset Tracker — Sekolah</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+  body { font-family: 'Inter', sans-serif; }
+  .glass { background: rgba(17,24,39,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06); }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0b0f19; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+</style>
 </head>
-<body>
-  <div class="iframe-container">
-    <iframe
-      id="app"
-      src="https://script.google.com/macros/s/AKfycbzU8uMTEQekO7FyJc2Y5nKVinRN5j9OjstUpWKNNyDzsmDQ3K7FNadqFIBsVfNjQRMj/exec"
-      scrolling="yes"
-      allowfullscreen="true"
-      webkitallowfullscreen="true"
-      mozallowfullscreen="true"
-      allow="fullscreen; camera; microphone; display-capture; geolocation;">
-    </iframe>
+<body class="bg-[#0b0f19] text-slate-200 min-h-screen">
+
+<!-- LOGIN -->
+<div id="login" class="min-h-screen flex items-center justify-center p-6">
+  <div class="glass rounded-3xl p-8 w-full max-w-md shadow-2xl shadow-blue-900/20">
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-extrabold tracking-tight text-white mb-1">Asset Tracker</h1>
+      <p class="text-sm text-slate-400">GitHub Pages Client</p>
+    </div>
+    <div id="err" class="hidden mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-sm text-rose-400 text-center"></div>
+    <form onsubmit="event.preventDefault(); doLogin();" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-slate-400 mb-1">Username</label>
+        <input id="u" type="text" placeholder="Masukkan username" class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition" autocomplete="off" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-400 mb-1">Password</label>
+        <input id="p" type="password" placeholder="Masukkan password" class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition" />
+      </div>
+      <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold shadow-lg shadow-blue-900/30 transition">Masuk Sistem</button>
+    </form>
   </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden min-h-screen flex flex-col md:flex-row">
+  <aside class="w-full md:w-72 glass md:h-screen md:sticky md:top-0 md:overflow-y-auto shrink-0 border-r border-slate-800">
+    <div class="p-6 md:p-8">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-900/40 text-white font-bold">AT</div>
+        <div>
+          <div class="text-lg font-extrabold tracking-tight leading-none text-white">Asset Tracker</div>
+          <div class="text-[10px] text-slate-400 tracking-wide mt-0.5">QR INVENTARIS SEKOLAH</div>
+        </div>
+      </div>
+      <nav class="space-y-1 text-sm font-medium">
+        <a href="#" onclick="showTab('dashboard')" id="nav-dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600/10 text-blue-400 border border-blue-500/20 transition"><span>◈</span> Dashboard</a>
+        <a href="#" onclick="showTab('borrow')" id="nav-borrow" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white transition"><span>◉</span> Form Pinjam</a>
+        <a href="#" onclick="showTab('return')" id="nav-return" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white transition"><span>↻</span> Form Kembali</a>
+        <button onclick="logout()" class="w-full text-left mt-6 px-4 py-3 rounded-xl text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition text-sm">◌ Keluar Sistem</button>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="flex-1 p-6 md:p-10 min-h-screen">
+    <header class="flex items-center justify-between mb-8 pb-4 border-b border-slate-800/60">
+      <div>
+        <h1 id="page-title" class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Dashboard</h1>
+        <p id="page-sub" class="text-sm text-slate-400 mt-1">Status aset sekolah secara real-time</p>
+      </div>
+      <div class="text-right">
+        <div class="text-xs text-slate-500 font-medium">WAKTU SISTEM</div>
+        <time id="sys-time" class="text-sm font-semibold text-slate-200">-</time>
+      </div>
+    </header>
+
+    <!-- Dashboard -->
+    <section id="tab-dashboard" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass rounded-2xl p-6">
+          <div class="text-xs text-slate-400 font-semibold mb-1">Total Aset</div>
+          <div id="total-assets" class="text-3xl font-extrabold text-white">0</div>
+        </div>
+        <div class="glass rounded-2xl p-6">
+          <div class="text-xs text-slate-400 font-semibold mb-1">Tersedia</div>
+          <div id="available-assets" class="text-3xl font-extrabold text-emerald-400">0</div>
+        </div>
+        <div class="glass rounded-2xl p-6">
+          <div class="text-xs text-slate-400 font-semibold mb-1">Dipinjam</div>
+          <div id="borrowed-assets" class="text-3xl font-extrabold text-amber-400">0</div>
+        </div>
+      </div>
+
+      <div class="glass rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-white">Daftar Status Aset</h2>
+          <button onclick="refreshDashboard()" class="text-xs bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-lg font-semibold transition text-white">Perbarui Data</button>
+        </div>
+        <div class="overflow-x-auto rounded-xl">
+          <table class="w-full text-sm text-left">
+            <thead class="text-xs text-slate-400 uppercase bg-white/5 border-b border-slate-800">
+              <tr>
+                <th class="px-4 py-3">Kode Aset</th>
+                <th class="px-4 py-3">Nama Barang</th>
+                <th class="px-4 py-3">Kategori</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3">Kondisi</th>
+                <th class="px-4 py-3">Dipinjam Oleh</th>
+              </tr>
+            </thead>
+            <tbody id="asset-table-body" class="divide-y divide-white/5">
+              <tr><td colspan="6" class="px-4 py-4 text-center text-slate-500">Memuat data aset...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Borrow -->
+    <section id="tab-borrow" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 glass rounded-2xl p-6 flex flex-col">
+          <h2 class="text-lg font-bold mb-3 text-white">Pindai QR Aset</h2>
+          <div class="relative w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex-1 min-h-[240px] flex items-center justify-center">
+            <div id="reader" class="w-full h-full"></div>
+            <div id="cam-permission-overlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-20">
+              <p class="text-xs text-slate-400 mb-3">Izinkan kamera untuk scan QR.</p>
+              <button onclick="initCamera('borrow')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold">Aktifkan Kamera</button>
+            </div>
+          </div>
+          <button onclick="stopScanner()" class="mt-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">Matikan Kamera</button>
+        </div>
+        <div class="lg:col-span-2 glass rounded-2xl p-6">
+          <h2 class="text-lg font-bold mb-4 text-white">Form Peminjaman Barang</h2>
+          <form onsubmit="event.preventDefault(); submitBorrow();" class="space-y-4">
+            <div>
+              <label class="block text-xs text-slate-400 font-semibold mb-1">Kode Aset</label>
+              <input id="borrow-code" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white font-mono" placeholder="Scan atau ketik kode (misal: AST-001)" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 font-semibold mb-1">Nama Peminjam</label>
+              <input id="borrow-name" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white" placeholder="Contoh: Budi" />
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 font-semibold mb-1">Kontak / Kelas</label>
+              <input id="borrow-contact" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white" placeholder="Contoh: XI-IPA 1" />
+            </div>
+            <div id="borrow-msg" class="text-sm font-medium"></div>
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold">Catat Peminjaman</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Return -->
+    <section id="tab-return" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 glass rounded-2xl p-6 flex flex-col">
+          <h2 class="text-lg font-bold mb-3 text-white">Scan Pengembalian</h2>
+          <div class="relative w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex-1 min-h-[240px] flex items-center justify-center">
+            <div id="reader-return" class="w-full h-full"></div>
+            <div id="cam-permission-overlay-return" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-20">
+              <p class="text-xs text-slate-400 mb-3">Izinkan kamera untuk scan QR.</p>
+              <button onclick="initCamera('return')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold">Aktifkan Kamera</button>
+            </div>
+          </div>
+          <button onclick="stopScanner()" class="mt-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">Matikan Kamera</button>
+        </div>
+        <div class="lg:col-span-2 glass rounded-2xl p-6">
+          <h2 class="text-lg font-bold mb-4 text-white">Form Pengembalian Barang</h2>
+          <form onsubmit="event.preventDefault(); submitReturn();" class="space-y-4">
+            <div>
+              <label class="block text-xs text-slate-400 font-semibold mb-1">Kode Aset</label>
+              <input id="return-code" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white font-mono" placeholder="Scan atau masukkan kode" />
+            </div>
+            <div id="return-msg" class="text-sm font-medium"></div>
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold">Konfirmasi Pengembalian</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+// GANTI URL DI BAWAH DENGAN URL DEPLOYMENT WEB APP GOOGLE APPS SCRIPT ANDA
+const API_URL = "https://script.google.com/macros/s/AKfycbwqVMiQ0-gFlWAJ-ZC3rEol8kGHN-J6mzuxMg0c38v2aae7aUNlnzws17oHClvem7tS/exec"; 
+
+let html5QrCode = null;
+
+function showTab(tab) {
+  stopScanner();
+  document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+  document.getElementById('tab-'+tab).classList.remove('hidden');
+  if(tab === 'dashboard') refreshDashboard();
+}
+
+function doLogin() {
+  const u = document.getElementById('u').value.trim();
+  const p = document.getElementById('p').value;
+  const errDiv = document.getElementById('err');
+  errDiv.classList.add('hidden');
+
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'login', username: u, password: p })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.ok) {
+      localStorage.setItem('at_user', data.name || u);
+      document.getElementById('login').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      refreshDashboard();
+    } else {
+      errDiv.textContent = data.error;
+      errDiv.classList.remove('hidden');
+    }
+  })
+  .catch(err => {
+    errDiv.textContent = 'Gagal terhubung ke backend: ' + err;
+    errDiv.classList.remove('hidden');
+  });
+}
+
+function logout() {
+  localStorage.removeItem('at_user');
+  location.reload();
+}
+
+if (localStorage.getItem('at_user')) {
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  refreshDashboard();
+}
+
+function refreshDashboard() {
+  fetch(API_URL + '?action=getAssets')
+  .then(res => res.json())
+  .then(rows => {
+    const tbody = document.getElementById('asset-table-body');
+    tbody.innerHTML = '';
+    let total=0, avail=0, borrow=0;
+
+    if(!rows || rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-slate-500">Tidak ada data aset.</td></tr>';
+      return;
+    }
+
+    rows.forEach(r => {
+      total++;
+      const isAvail = (r[3] || '').toLowerCase().includes('tersedia');
+      if (isAvail) avail++; else borrow++;
+      
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="hover:bg-white/5 transition">
+          <td class="px-4 py-3 font-mono text-xs text-slate-300">${r[0]}</td>
+          <td class="px-4 py-3 text-white font-medium">${r[1]}</td>
+          <td class="px-4 py-3 text-slate-300">${r[2]}</td>
+          <td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${isAvail ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">${r[3]}</span></td>
+          <td class="px-4 py-3 text-slate-300">${r[4]}</td>
+          <td class="px-4 py-3 text-slate-300 text-xs">${r[5]}</td>
+        </tr>
+      `);
+    });
+    document.getElementById('total-assets').textContent = total;
+    document.getElementById('available-assets').textContent = avail;
+    document.getElementById('borrowed-assets').textContent = borrow;
+  })
+  .catch(err => console.error("Error fetching assets:", err));
+}
+
+function initCamera(mode) {
+  stopScanner();
+  const overlayId = mode === 'borrow' ? 'cam-permission-overlay' : 'cam-permission-overlay-return';
+  const elementId = mode === 'borrow' ? 'reader' : 'reader-return';
+  document.getElementById(overlayId).style.display = 'none';
+
+  html5QrCode = new Html5Qrcode(elementId);
+  html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 200, height: 200 } }, (text) => {
+    if (mode === 'borrow') document.getElementById('borrow-code').value = text;
+    else document.getElementById('return-code').value = text;
+    stopScanner();
+  }).catch(err => {
+    document.getElementById(overlayId).style.display = 'flex';
+  });
+}
+
+function stopScanner() {
+  if (html5QrCode) {
+    html5QrCode.stop().then(() => html5QrCode.clear()).catch(e => {});
+    html5QrCode = null;
+  }
+  ['cam-permission-overlay', 'cam-permission-overlay-return'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'flex';
+  });
+}
+
+function submitBorrow() {
+  const code = document.getElementById('borrow-code').value.trim();
+  const name = document.getElementById('borrow-name').value.trim();
+  const contact = document.getElementById('borrow-contact').value.trim();
+  const msg = document.getElementById('borrow-msg');
+  
+  msg.innerHTML = '<span class="text-blue-400">Menyimpan...</span>';
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'catatPeminjaman', idAset: code, peminjam: name, kontak: contact, status: 'Dipinjam' })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.ok) {
+      msg.innerHTML = '<span class="text-emerald-400">Peminjaman berhasil dicatat!</span>';
+      document.getElementById('borrow-code').value = '';
+      document.getElementById('borrow-name').value = '';
+      document.getElementById('borrow-contact').value = '';
+    } else {
+      msg.innerHTML = '<span class="text-rose-400">Gagal: ' + data.error + '</span>';
+    }
+  });
+}
+
+function submitReturn() {
+  const code = document.getElementById('return-code').value.trim();
+  const msg = document.getElementById('return-msg');
+  
+  msg.innerHTML = '<span class="text-blue-400">Memproses...</span>';
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'catatPeminjaman', idAset: code, peminjam: '-', kontak: '-', status: 'Dikembalikan' })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.ok) {
+      msg.innerHTML = '<span class="text-emerald-400">Barang berhasil dikembalikan!</span>';
+      document.getElementById('return-code').value = '';
+    } else {
+      msg.innerHTML = '<span class="text-rose-400">Gagal: ' + data.error + '</span>';
+    }
+  });
+}
+</script>
 </body>
 </html>
