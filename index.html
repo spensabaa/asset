@@ -147,15 +147,15 @@
           <form onsubmit="event.preventDefault(); submitBorrow();" class="space-y-4">
             <div>
               <label class="block text-xs text-slate-400 font-semibold mb-1">Kode Aset</label>
-              <input id="borrow-code" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white font-mono" placeholder="Scan atau ketik kode (misal: AST-001)" />
+              <input id="borrow-code" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white font-mono" placeholder="Scan atau ketik kode (misal: PRY-001)" />
             </div>
             <div>
               <label class="block text-xs text-slate-400 font-semibold mb-1">Nama Peminjam</label>
-              <input id="borrow-name" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white" placeholder="Contoh: Budi" />
+              <input id="borrow-name" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white" placeholder="Contoh: Setyo Setyawan" />
             </div>
             <div>
               <label class="block text-xs text-slate-400 font-semibold mb-1">Kontak / Kelas</label>
-              <input id="borrow-contact" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white" placeholder="Contoh: XI-IPA 1" />
+              <input id="borrow-contact" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white" placeholder="Contoh: Guru IPA" />
             </div>
             <div id="borrow-msg" class="text-sm font-medium"></div>
             <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold">Catat Peminjaman</button>
@@ -480,7 +480,7 @@ function stopScanner() {
 function submitBorrow() {
   const code = document.getElementById('borrow-code').value.trim();
   const name = document.getElementById('borrow-name').value.trim();
-  const contact = document.getElementById('borrow-contact').value.trim();
+  const contact = document.getElementById('borrow-contact').value.trim(); // Variabel kontak sudah diperbaiki di sini
   const msg = document.getElementById('borrow-msg');
   
   msg.innerHTML = '<span class="text-blue-400">Menyimpan ke Google Sheets...</span>';
@@ -488,7 +488,7 @@ function submitBorrow() {
   fetch(API_URL, {
     method: 'POST',
     redirect: "follow",
-    body: JSON.stringify({ action: 'catatPeminjaman', idAset: code, peminjam: name, kontak: kontak, status: 'Dipinjam' })
+    body: JSON.stringify({ action: 'catatPeminjaman', idAset: code, peminjam: name, kontak: contact, status: 'Dipinjam' })
   })
   .then(res => res.json())
   .then(data => {
@@ -497,12 +497,13 @@ function submitBorrow() {
       document.getElementById('borrow-code').value = '';
       document.getElementById('borrow-name').value = '';
       document.getElementById('borrow-contact').value = '';
+      refreshDashboard();
     } else {
       msg.innerHTML = '<span class="text-rose-400">Gagal: ' + (data.error || 'Terjadi kesalahan') + '</span>';
     }
   })
   .catch(err => {
-    msg.innerHTML = '<span class="text-emerald-400">✓ Perintah terkirim! Silakan cek Dashboard.</span>';
+    msg.innerHTML = '<span class="text-rose-400">Gagal terhubung ke server.</span>';
     console.error(err);
   });
 }
@@ -523,12 +524,13 @@ function submitReturn() {
     if(data.ok) {
       msg.innerHTML = '<span class="text-emerald-400">✓ Barang berhasil dikembalikan!</span>';
       document.getElementById('return-code').value = '';
+      refreshDashboard();
     } else {
       msg.innerHTML = '<span class="text-rose-400">Gagal: ' + (data.error || 'Terjadi kesalahan') + '</span>';
     }
   })
   .catch(err => {
-    msg.innerHTML = '<span class="text-emerald-400">✓ Perintah terkirim! Silakan cek Dashboard.</span>';
+    msg.innerHTML = '<span class="text-rose-400">Gagal terhubung ke server.</span>';
     console.error(err);
   });
 }
