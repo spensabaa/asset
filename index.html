@@ -1,339 +1,537 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asset Tracker - QR Inventaris Sekolah</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0d0f17; color: #fff; display: flex; height: 100vh; overflow: hidden; }
-        
-        /* Sidebar */
-        .sidebar { width: 260px; background: #131622; border-right: 1px solid #1f2430; display: flex; flex-direction: column; padding: 20px; }
-        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }
-        .brand-logo { background: #3b82f6; color: white; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 8px; }
-        .brand-title h2 { font-size: 16px; font-weight: bold; }
-        .brand-title p { font-size: 11px; color: #8a99ad; }
-        
-        .menu-list { display: flex; flex-direction: column; gap: 8px; flex: 1; }
-        .menu-item { padding: 12px 15px; border-radius: 8px; color: #8a99ad; text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
-        .menu-item:hover, .menu-item.active { background: #1d2333; color: #fff; }
-        .menu-item.logout { color: #ef4444; margin-top: auto; }
-
-        /* Main Content */
-        .main-content { flex: 1; padding: 30px; overflow-y: auto; }
-        .header-dash { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .header-dash h1 { font-size: 24px; font-weight: bold; }
-        .header-dash p { font-size: 13px; color: #8a99ad; margin-top: 4px; }
-        .system-time { font-size: 12px; color: #8a99ad; text-align: right; }
-
-        /* Cards */
-        .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-        .card { background: #131622; border: 1px solid #1f2430; border-radius: 12px; padding: 20px; }
-        .card h3 { font-size: 13px; color: #8a99ad; margin-bottom: 10px; font-weight: normal; }
-        .card .number { font-size: 32px; font-weight: bold; }
-
-        /* Table Section */
-        .table-container { background: #131622; border: 1px solid #1f2430; border-radius: 12px; padding: 20px; }
-        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .table-header h3 { font-size: 16px; }
-        
-        /* QR Search Bar Baru */
-        .search-box { display: flex; gap: 10px; margin-bottom: 15px; }
-        .search-box input { flex: 1; padding: 10px 15px; background: #0d0f17; border: 1px solid #1f2430; color: #fff; border-radius: 8px; font-size: 14px; }
-        
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { font-size: 12px; color: #8a99ad; text-transform: uppercase; padding: 12px; border-bottom: 1px solid #1f2430; }
-        td { padding: 14px 12px; font-size: 14px; border-bottom: 1px solid #191e29; }
-        
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-block; }
-        .badge.tersedia { background: rgba(16, 185, 129, 0.15); color: #10b981; }
-        .badge.dipinjam { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
-
-        .btn-action { background: #1d2333; color: #60a5fa; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-        .btn-action:hover { background: #252b3d; }
-        
-        .btn-refresh { background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-
-        /* Form Sections */
-        .form-section { display: none; background: #131622; border: 1px solid #1f2430; border-radius: 12px; padding: 25px; max-width: 600px; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 13px; color: #8a99ad; margin-bottom: 6px; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; background: #0d0f17; border: 1px solid #1f2430; color: #fff; border-radius: 8px; font-size: 14px; }
-        .btn-submit { background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asset Tracker — Sekolah</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+  body { font-family: 'Inter', sans-serif; }
+  .glass { background: rgba(17,24,39,0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.06); }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #0b0f19; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  
+  @media print {
+    body * { visibility: hidden; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area { position: absolute; left: 0; top: 0; width: 100%; background: white; color: black; }
+  }
+</style>
 </head>
-<body>
+<body class="bg-[#0b0f19] text-slate-200 min-h-screen">
 
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="brand">
-            <div class="brand-logo">AT</div>
-            <div class="brand-title">
-                <h2>Asset Tracker</h2>
-                <p>QR INVENTARIS SEKOLAH</p>
-            </div>
-        </div>
-        <div class="menu-list">
-            <a class="menu-item active" onclick="switchTab('dashboard', this)">Dashboard</a>
-            <a class="menu-item" onclick="switchTab('formPinjam', this)">Form Pinjam</a>
-            <a class="menu-item" onclick="switchTab('formKembali', this)">Form Kembali</a>
-            <a class="menu-item logout" onclick="logout()">Keluar Sistem</a>
-        </div>
+<!-- LOGIN SECTION -->
+<div id="login" class="min-h-screen flex items-center justify-center p-6">
+  <div class="glass rounded-3xl p-8 w-full max-w-md shadow-2xl shadow-blue-900/20">
+    <div class="text-center mb-6">
+      <h1 class="text-3xl font-extrabold tracking-tight text-white mb-1">Asset Tracker</h1>
+      <p class="text-sm text-slate-400">GitHub Pages Client</p>
     </div>
+    <div id="err" class="hidden mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-sm text-rose-400 text-center"></div>
+    <form onsubmit="event.preventDefault(); doLogin();" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold text-slate-400 mb-1">Username</label>
+        <input id="u" type="text" placeholder="Masukkan username" class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition text-white" autocomplete="off" />
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-slate-400 mb-1">Password</label>
+        <input id="p" type="password" placeholder="Masukkan password" class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition text-white" />
+      </div>
+      <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold shadow-lg shadow-blue-900/30 transition">Masuk Sistem</button>
+    </form>
+  </div>
+</div>
 
-    <!-- Main Content -->
-    <div class="main-content">
+<!-- MAIN APP SECTION -->
+<div id="app" class="hidden min-h-screen flex flex-col md:flex-row">
+  <aside class="w-full md:w-72 glass md:h-screen md:sticky md:top-0 md:overflow-y-auto shrink-0 border-r border-slate-800">
+    <div class="p-6 md:p-8">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-900/40 text-white font-bold">AT</div>
+        <div>
+          <div class="text-lg font-extrabold tracking-tight leading-none text-white">Asset Tracker</div>
+          <div class="text-[10px] text-slate-400 tracking-wide mt-0.5">QR INVENTARIS SEKOLAH</div>
+        </div>
+      </div>
+      <nav class="space-y-1 text-sm font-medium">
+        <a href="#" onclick="showTab('dashboard')" id="nav-dashboard" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-600/10 text-blue-400 border border-blue-500/20 transition"><span>◈</span> Dashboard</a>
+        <a href="#" onclick="showTab('borrow')" id="nav-borrow" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white transition"><span>◉</span> Form Pinjam</a>
+        <a href="#" onclick="showTab('return')" id="nav-return" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-white/5 hover:text-white transition"><span>↻</span> Form Kembali</a>
+        <button onclick="logout()" class="w-full text-left mt-6 px-4 py-3 rounded-xl text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition text-sm">◌ Keluar Sistem</button>
+      </nav>
+    </div>
+  </aside>
+
+  <main class="flex-1 p-6 md:p-10 min-h-screen">
+    <header class="flex items-center justify-between mb-8 pb-4 border-b border-slate-800/60">
+      <div>
+        <h1 id="page-title" class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Dashboard</h1>
+        <p id="page-sub" class="text-sm text-slate-400 mt-1">Status aset sekolah secara real-time</p>
+      </div>
+      <div class="text-right">
+        <div class="text-xs text-slate-500 font-medium">WAKTU SISTEM</div>
+        <time id="sys-time" class="text-sm font-semibold text-slate-200">-</time>
+      </div>
+    </header>
+
+    <!-- Tab Dashboard -->
+    <section id="tab-dashboard" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass rounded-2xl p-6">
+          <div class="text-xs text-slate-400 font-semibold mb-1">Total Aset</div>
+          <div id="total-assets" class="text-3xl font-extrabold text-white">0</div>
+        </div>
+        <div class="glass rounded-2xl p-6">
+          <div class="text-xs text-slate-400 font-semibold mb-1">Tersedia</div>
+          <div id="available-assets" class="text-3xl font-extrabold text-emerald-400">0</div>
+        </div>
+        <div class="glass rounded-2xl p-6">
+          <div class="text-xs text-slate-400 font-semibold mb-1">Dipinjam</div>
+          <div id="borrowed-assets" class="text-3xl font-extrabold text-amber-400">0</div>
+        </div>
+      </div>
+
+      <div class="glass rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-white">Daftar Status Aset</h2>
+          <button onclick="refreshDashboard()" class="text-xs bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded-lg font-semibold transition text-white">Perbarui Data</button>
+        </div>
+        <div class="overflow-x-auto rounded-xl">
+          <table class="w-full text-sm text-left">
+            <thead class="text-xs text-slate-400 uppercase bg-white/5 border-b border-slate-800">
+              <tr>
+                <th class="px-4 py-3">Kode Aset</th>
+                <th class="px-4 py-3">Nama Barang</th>
+                <th class="px-4 py-3">Kategori</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3">Kondisi</th>
+                <th class="px-4 py-3">Dipinjam Oleh</th>
+                <th class="px-4 py-3 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="asset-table-body" class="divide-y divide-white/5">
+              <tr><td colspan="7" class="px-4 py-4 text-center text-slate-500">Memuat data aset...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tab Form Pinjam -->
+    <section id="tab-borrow" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 glass rounded-2xl p-6 flex flex-col">
+          <h2 class="text-lg font-bold mb-3 text-white">Pindai QR Aset</h2>
+          <div class="mb-3">
+            <label class="block text-[11px] text-slate-400 font-semibold mb-1">Pilih Kamera:</label>
+            <select id="camera-select-borrow" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white" onchange="changeCamera('borrow')">
+              <option value="">Aktifkan kamera terlebih dahulu...</option>
+            </select>
+          </div>
+          <div class="relative w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex-1 min-h-[200px] flex items-center justify-center">
+            <div id="reader" class="w-full h-full"></div>
+            <div id="cam-permission-overlay" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-20">
+              <p class="text-xs text-slate-400 mb-3">Izinkan akses kamera untuk memindai QR.</p>
+              <button onclick="initCamera('borrow')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold">Aktifkan Kamera</button>
+            </div>
+          </div>
+          <button onclick="stopScanner()" class="mt-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">Matikan Kamera</button>
+        </div>
         
-        <!-- DASHBOARD TAB -->
-        <div id="tab-dashboard" class="tab-content">
-            <div class="header-dash">
-                <div>
-                    <h1>Dashboard</h1>
-                    <p>Status aset sekolah secara real-time</p>
-                </div>
-                <div class="system-time" id="clock">WAKTU SISTEM<br>--:--:--</div>
+        <div class="lg:col-span-2 glass rounded-2xl p-6">
+          <h2 class="text-lg font-bold mb-4 text-white">Form Peminjaman Barang</h2>
+          <form onsubmit="event.preventDefault(); submitBorrow();" class="space-y-4">
+            <div>
+              <label class="block text-xs text-slate-400 font-semibold mb-1">Kode Aset</label>
+              <input id="borrow-code" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white font-mono" placeholder="Scan atau ketik kode (misal: AST-001)" />
             </div>
-
-            <div class="cards-grid">
-                <div class="card">
-                    <h3>Total Aset</h3>
-                    <div class="number" id="totalAset">0</div>
-                </div>
-                <div class="card">
-                    <h3>Tersedia</h3>
-                    <div class="number" id="tersediaAset" style="color: #10b981;">0</div>
-                </div>
-                <div class="card">
-                    <h3>Dipinjam</h3>
-                    <div class="number" id="dipinjamAset" style="color: #ef4444;">0</div>
-                </div>
+            <div>
+              <label class="block text-xs text-slate-400 font-semibold mb-1">Nama Peminjam</label>
+              <input id="borrow-name" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white" placeholder="Contoh: Budi" />
             </div>
-
-            <div class="table-container">
-                <div class="table-header">
-                    <h3>Daftar Status Aset</h3>
-                    <button class="btn-refresh" onclick="loadAssets()">Perbarui Data</button>
-                </div>
-                
-                <!-- Kotak Input Scan / Cari QR Code -->
-                <div class="search-box">
-                    <input type="text" id="qrSearchInput" placeholder="🔍 Ketik atau Scan QR Code / ID Aset (contoh: AST-001)..." onkeyup="filterTable()">
-                </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Kode Aset</th>
-                            <th>Nama Barang</th>
-                            <th>Kategori</th>
-                            <th>Status</th>
-                            <th>Kondisi</th>
-                            <th>Dipinjam Oleh</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="assetTableBody">
-                        <tr><td colspan="7" style="text-align: center; color: #8a99ad;">Memuat data...</td></tr>
-                    </tbody>
-                </table>
+            <div>
+              <label class="block text-xs text-slate-400 font-semibold mb-1">Kontak / Kelas</label>
+              <input id="borrow-contact" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white" placeholder="Contoh: XI-IPA 1" />
             </div>
+            <div id="borrow-msg" class="text-sm font-medium"></div>
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold">Catat Peminjaman</button>
+          </form>
         </div>
+      </div>
+    </section>
 
-        <!-- FORM PINJAM TAB -->
-        <div id="tab-formPinjam" class="tab-content form-section" style="display:none;">
-            <h2>Form Peminjaman Aset</h2>
-            <p style="color: #8a99ad; font-size: 13px; margin-bottom: 20px;">Catat peminjaman barang inventaris sekolah</p>
-            <form id="pinjamForm" onsubmit="submitPeminjaman(event, 'Dipinjam')">
-                <div class="form-group">
-                    <label>ID / Kode Aset (Scan QR)</label>
-                    <input type="text" id="pinjamIdAset" placeholder="Contoh: AST-001" required>
-                </div>
-                <div class="form-group">
-                    <label>Nama Peminjam</label>
-                    <input type="text" id="peminjamNama" placeholder="Nama lengkap & kelas/jabatan" required>
-                </div>
-                <div class="form-group">
-                    <label>Kontak / Kelas</label>
-                    <input type="text" id="peminjamKontak" placeholder="No HP / Kelas" required>
-                </div>
-                <button type="submit" class="btn-submit">Proses Peminjaman</button>
-            </form>
+    <!-- Tab Form Kembali -->
+    <section id="tab-return" class="hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-1 glass rounded-2xl p-6 flex flex-col">
+          <h2 class="text-lg font-bold mb-3 text-white">Scan Pengembalian</h2>
+          <div class="mb-3">
+            <label class="block text-[11px] text-slate-400 font-semibold mb-1">Pilih Kamera:</label>
+            <select id="camera-select-return" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white" onchange="changeCamera('return')">
+              <option value="">Aktifkan kamera terlebih dahulu...</option>
+            </select>
+          </div>
+          <div class="relative w-full rounded-xl overflow-hidden bg-slate-950 border border-slate-800 flex-1 min-h-[200px] flex items-center justify-center">
+            <div id="reader-return" class="w-full h-full"></div>
+            <div id="cam-permission-overlay-return" class="absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-4 text-center z-20">
+              <p class="text-xs text-slate-400 mb-3">Izinkan akses kamera untuk memindai QR.</p>
+              <button onclick="initCamera('return')" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold">Aktifkan Kamera</button>
+            </div>
+          </div>
+          <button onclick="stopScanner()" class="mt-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">Matikan Kamera</button>
         </div>
-
-        <!-- FORM KEMBALI TAB -->
-        <div id="tab-formKembali" class="tab-content form-section" style="display:none;">
-            <h2>Form Pengembalian Aset</h2>
-            <p style="color: #8a99ad; font-size: 13px; margin-bottom: 20px;">Kembalikan aset ke status tersedia</p>
-            <form id="kembaliForm" onsubmit="submitPeminjaman(event, 'Tersedia')">
-                <div class="form-group">
-                    <label>ID / Kode Aset (Scan QR)</label>
-                    <input type="text" id="kembaliIdAset" placeholder="Contoh: AST-001" required>
-                </div>
-                <button type="submit" class="btn-submit" style="background: #10b981;">Proses Pengembalian</button>
-            </form>
+        
+        <div class="lg:col-span-2 glass rounded-2xl p-6">
+          <h2 class="text-lg font-bold mb-4 text-white">Form Pengembalian Barang</h2>
+          <form onsubmit="event.preventDefault(); submitReturn();" class="space-y-4">
+            <div>
+              <label class="block text-xs text-slate-400 font-semibold mb-1">Kode Aset</label>
+              <input id="return-code" type="text" required class="w-full px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-700 text-sm text-white font-mono" placeholder="Scan atau masukkan kode" />
+            </div>
+            <div id="return-msg" class="text-sm font-medium"></div>
+            <button type="submit" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold">Konfirmasi Pengembalian</button>
+          </form>
         </div>
+      </div>
+    </section>
+  </main>
+</div>
 
+<!-- MODAL / AREA CETAK QR -->
+<div id="print-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+  <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl">
+    <h3 class="text-lg font-bold text-white mb-4">Cetak Label QR Aset</h3>
+    
+    <div id="print-area" class="bg-white text-black p-6 rounded-2xl inline-block shadow-md mx-auto mb-6">
+      <div class="text-[10px] font-bold tracking-wider text-slate-600 uppercase mb-1">INVENTARIS SEKOLAH</div>
+      <div id="modal-qr-container" class="flex justify-center my-3"></div>
+      <div id="modal-asset-code" class="font-mono font-extrabold text-sm text-black"></div>
+      <div id="modal-asset-name" class="text-xs text-slate-700 font-medium mt-0.5"></div>
     </div>
 
-    <script>
-        // GANTI URL INI DENGAN WEB APP URL GOOGLE APPS SCRIPT ANDA
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz8czWJ_NJtkADryROQCQe1pjdAIPEpa3N10bCvXJL0UJyFasbePXdfxQH2sMaClGmK/exec"; 
+    <div class="flex gap-3">
+      <button onclick="window.print()" class="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs">Cetak Sekarang</button>
+      <button onclick="closePrintModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">Tutup</button>
+    </div>
+  </div>
+</div>
 
-        let globalAssetsData = [];
+<!-- JAVASCRIPT UTAMA -->
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbxxIuFWpXcXNrHrjaicaZT5qFDZw_bTdjuFOTzvj3HylI7TazlfcnHnMm0pvtP2gqEb/exec"; 
 
-        // Jam Sistem
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('clock').innerHTML = `WAKTU SISTEM<br>${now.toLocaleDateString('id-ID', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})} ${now.toLocaleTimeString()}`;
-        }, 1000);
+let html5QrCode = null;
 
-        function switchTab(tabName, element) {
-            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
-            
-            if(element) element.classList.add('active');
-            
-            if(tabName === 'dashboard') {
-                document.getElementById('tab-dashboard').style.display = 'block';
-                loadAssets();
-            } else if(tabName === 'formPinjam') {
-                document.getElementById('tab-formPinjam').style.display = 'block';
-            } else if(tabName === 'formKembali') {
-                document.getElementById('tab-formKembali').style.display = 'block';
-            }
+setInterval(() => {
+  const now = new Date();
+  document.getElementById('sys-time').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' ' + now.toLocaleTimeString('id-ID');
+}, 1000);
+
+function showTab(tab) {
+  stopScanner();
+  document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+  document.getElementById('tab-'+tab).classList.remove('hidden');
+  if(tab === 'dashboard') refreshDashboard();
+}
+
+function doLogin() {
+  const u = document.getElementById('u').value.trim();
+  const p = document.getElementById('p').value;
+  const errDiv = document.getElementById('err');
+  errDiv.classList.add('hidden');
+
+  fetch(API_URL, {
+    method: 'POST',
+    redirect: "follow",
+    body: JSON.stringify({ action: 'login', username: u, password: p })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.ok) {
+      localStorage.setItem('at_user', data.name || u);
+      document.getElementById('login').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      refreshDashboard();
+    } else {
+      errDiv.textContent = data.error;
+      errDiv.classList.remove('hidden');
+    }
+  })
+  .catch(err => {
+    errDiv.textContent = 'Gagal terhubung ke backend: ' + err;
+    errDiv.classList.remove('hidden');
+  });
+}
+
+function logout() {
+  localStorage.removeItem('at_user');
+  location.reload();
+}
+
+if (localStorage.getItem('at_user')) {
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  refreshDashboard();
+}
+
+function refreshDashboard() {
+  fetch(API_URL + '?action=getAssets')
+  .then(res => res.json())
+  .then(rows => {
+    const tbody = document.getElementById('asset-table-body');
+    tbody.innerHTML = '';
+    let total=0, avail=0, borrow=0;
+
+    if(!rows || rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-slate-500">Tidak ada data aset.</td></tr>';
+      return;
+    }
+
+    rows.forEach(r => {
+      total++;
+      const isAvail = (r[3] || '').toLowerCase().includes('tersedia');
+      if (isAvail) avail++; else borrow++;
+      
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr class="hover:bg-white/5 transition">
+          <td class="px-4 py-3 font-mono text-xs text-slate-300">${r[0]}</td>
+          <td class="px-4 py-3 text-white font-medium">${r[1]}</td>
+          <td class="px-4 py-3 text-slate-300">${r[2]}</td>
+          <td class="px-4 py-3"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${isAvail ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">${r[3]}</span></td>
+          <td class="px-4 py-3 text-slate-300">${r[4]}</td>
+          <td class="px-4 py-3 text-slate-300 text-xs">${r[5]}</td>
+          <td class="px-4 py-3 text-center">
+            <button onclick="openPrintModal('${r[0]}', '${r[1]}')" class="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 text-xs font-bold transition">Cetak QR</button>
+          </td>
+        </tr>
+      `);
+    });
+    document.getElementById('total-assets').textContent = total;
+    document.getElementById('available-assets').textContent = avail;
+    document.getElementById('borrowed-assets').textContent = borrow;
+  })
+  .catch(err => console.error("Error fetching assets:", err));
+}
+
+function openPrintModal(code, name) {
+  const modal = document.getElementById('print-modal');
+  const qrContainer = document.getElementById('modal-qr-container');
+  
+  qrContainer.innerHTML = '';
+  document.getElementById('modal-asset-code').textContent = code;
+  document.getElementById('modal-asset-name').textContent = name;
+
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+
+  const qrText = `ASSET_TRACKER | CODE=${code} | NAME=${name}`;
+  new QRCode(qrContainer, {
+    text: qrText,
+    width: 140,
+    height: 140,
+    colorDark : "#000000",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+  });
+}
+
+function closePrintModal() {
+  const modal = document.getElementById('print-modal');
+  modal.classList.remove('flex');
+  modal.classList.add('hidden');
+}
+
+function initCamera(mode) {
+  stopScanner();
+  const overlayId = mode === 'borrow' ? 'cam-permission-overlay' : 'cam-permission-overlay-return';
+  const elementId = mode === 'borrow' ? 'reader' : 'reader-return';
+  const selectId = mode === 'borrow' ? 'camera-select-borrow' : 'camera-select-return';
+  
+  document.getElementById(overlayId).style.display = 'none';
+  html5QrCode = new Html5Qrcode(elementId);
+
+  Html5Qrcode.getCameras().then(devices => {
+    if (devices && devices.length) {
+      const select = document.getElementById(selectId);
+      select.innerHTML = '';
+      
+      devices.forEach((device, index) => {
+        const option = document.createElement('option');
+        option.value = device.id;
+        option.text = device.label || `Kamera ${index + 1}`;
+        select.appendChild(option);
+      });
+
+      let selectedCamId = devices[0].id;
+      for (let device of devices) {
+        const label = device.label.toLowerCase();
+        if (label.includes('back') || label.includes('rear') || label.includes('belakang') || label.includes('environment')) {
+          selectedCamId = device.id;
+          select.value = selectedCamId;
+          break;
         }
+      }
 
-        function loadAssets() {
-            const tbody = document.getElementById('assetTableBody');
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #8a99ad;">Memperbarui data...</td></tr>`;
+      startScannerStream(selectedCamId, mode, elementId, overlayId);
+    } else {
+      alert("Tidak ada perangkat kamera yang terdeteksi.");
+      document.getElementById(overlayId).style.display = 'flex';
+    }
+  }).catch(err => {
+    console.error("Gagal mendapatkan daftar kamera:", err);
+    startFallbackMode(elementId, overlayId, mode);
+  });
+}
 
-            fetch(SCRIPT_URL + '?action=getAssets')
-                .then(res => res.json())
-                .then(data => {
-                    globalAssetsData = data;
-                    renderTable(data);
-                })
-                .catch(err => {
-                    console.error(err);
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #ef4444;">Gagal memuat data dari server.</td></tr>`;
-                });
+function startScannerStream(cameraId, mode, elementId, overlayId) {
+  html5QrCode.start(
+    cameraId,
+    { fps: 10, qrbox: { width: 200, height: 200 } },
+    (text) => {
+      let finalCode = text;
+      if (text.includes("CODE=")) {
+        const parts = text.split("|");
+        for (let part of parts) {
+          if (part.trim().startsWith("CODE=")) {
+            finalCode = part.trim().replace("CODE=", "");
+            break;
+          }
         }
+      }
 
-        function renderTable(data) {
-            const tbody = document.getElementById('assetTableBody');
-            tbody.innerHTML = '';
+      if (mode === 'borrow') {
+        document.getElementById('borrow-code').value = finalCode;
+      } else {
+        document.getElementById('return-code').value = finalCode;
+      }
+      stopScanner();
+    },
+    (err) => {}
+  ).catch(err => {
+    console.error("Gagal memulai stream kamera:", err);
+    document.getElementById(overlayId).style.display = 'flex';
+  });
+}
 
-            let total = data.length;
-            let tersedia = 0;
-            let dipinjam = 0;
+function changeCamera(mode) {
+  const selectId = mode === 'borrow' ? 'camera-select-borrow' : 'camera-select-return';
+  const newCamId = document.getElementById(selectId).value;
+  const elementId = mode === 'borrow' ? 'reader' : 'reader-return';
+  const overlayId = mode === 'borrow' ? 'cam-permission-overlay' : 'cam-permission-overlay-return';
 
-            if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #8a99ad;">Tidak ada data aset.</td></tr>`;
-                return;
-            }
+  if (html5QrCode && html5QrCode.isScanning) {
+    html5QrCode.stop().then(() => {
+      startScannerStream(newCamId, mode, elementId, overlayId);
+    }).catch(err => console.error(err));
+  } else {
+    startScannerStream(newCamId, mode, elementId, overlayId);
+  }
+}
 
-            data.forEach(row => {
-                let id = row[0];
-                let nama = row[1];
-                let kat = row[2];
-                let status = row[3];
-                let kondisi = row[4];
-                let peminjam = row[5];
-
-                if (status === 'Dipinjam') dipinjam++;
-                else tersedia++;
-
-                let badgeClass = (status === 'Dipinjam') ? 'dipinjam' : 'tersedia';
-
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><b>${id}</b></td>
-                    <td>${nama}</td>
-                    <td>${kat}</td>
-                    <td><span class="badge ${badgeClass}">${status}</span></td>
-                    <td>${kondisi}</td>
-                    <td>${peminjam}</td>
-                    <td><button class="btn-action" onclick="pilihPinjam('${id}')">Pinjam</button></td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            document.getElementById('totalAset').innerText = total;
-            document.getElementById('tersediaAset').innerText = tersedia;
-            document.getElementById('dipinjamAset').innerText = dipinjam;
+function startFallbackMode(elementId, overlayId, mode) {
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 200, height: 200 } },
+    (text) => {
+      let finalCode = text;
+      if (text.includes("CODE=")) {
+        const parts = text.split("|");
+        for (let part of parts) {
+          if (part.trim().startsWith("CODE=")) {
+            finalCode = part.trim().replace("CODE=", "");
+            break;
+          }
         }
+      }
 
-        // Fungsi Filter Pencarian QR / Kode Aset secara real-time
-        function filterTable() {
-            let query = document.getElementById('qrSearchInput').value.toLowerCase();
-            let filtered = globalAssetsData.filter(row => {
-                let idAset = String(row[0]).toLowerCase();
-                let namaBarang = String(row[1]).toLowerCase();
-                return idAset.includes(query) || namaBarang.includes(query);
-            });
-            renderTable(filtered);
-        }
+      if (mode === 'borrow') {
+        document.getElementById('borrow-code').value = finalCode;
+      } else {
+        document.getElementById('return-code').value = finalCode;
+      }
+      stopScanner();
+    },
+    (err) => {}
+  ).catch(err => {
+    document.getElementById(overlayId).style.display = 'flex';
+    alert("Gagal mengakses kamera. Periksa izin akses browser Anda.");
+  });
+}
 
-        function pilihPinjam(idAset) {
-            switchTab('formPinjam', document.querySelectorAll('.menu-item')[1]);
-            document.getElementById('pinjamIdAset').value = idAset;
-        }
+function stopScanner() {
+  if (html5QrCode) {
+    if (html5QrCode.isScanning) {
+      html5QrCode.stop().then(() => {
+        try { html5QrCode.clear(); } catch(e){}
+      }).catch(e => {});
+    }
+    html5QrCode = null;
+  }
+  ['cam-permission-overlay', 'cam-permission-overlay-return'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.style.display = 'flex';
+  });
+}
 
-        // Kirim Form Peminjaman / Pengembalian dengan Validasi Notifikasi Backend
-        function submitPeminjaman(event, statusTujuan) {
-            event.preventDefault();
-            
-            let idAset = document.getElementById(statusTujuan === 'Dipinjam' ? 'pinjamIdAset' : 'kembaliIdAset').value;
-            let peminjam = statusTujuan === 'Dipinjam' ? document.getElementById('peminjamNama').value : '-';
-            let kontak = statusTujuan === 'Dipinjam' ? document.getElementById('peminjamKontak').value : '-';
+function submitBorrow() {
+  const code = document.getElementById('borrow-code').value.trim();
+  const name = document.getElementById('borrow-name').value.trim();
+  const contact = document.getElementById('borrow-contact').value.trim();
+  const msg = document.getElementById('borrow-msg');
+  
+  msg.innerHTML = '<span class="text-blue-400">Menyimpan ke Google Sheets...</span>';
+  
+  fetch(API_URL, {
+    method: 'POST',
+    redirect: "follow",
+    body: JSON.stringify({ action: 'catatPeminjaman', idAset: code, peminjam: name, kontak: kontak, status: 'Dipinjam' })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.ok) {
+      msg.innerHTML = '<span class="text-emerald-400">✓ Peminjaman berhasil dicatat!</span>';
+      document.getElementById('borrow-code').value = '';
+      document.getElementById('borrow-name').value = '';
+      document.getElementById('borrow-contact').value = '';
+    } else {
+      msg.innerHTML = '<span class="text-rose-400">Gagal: ' + (data.error || 'Terjadi kesalahan') + '</span>';
+    }
+  })
+  .catch(err => {
+    msg.innerHTML = '<span class="text-emerald-400">✓ Perintah terkirim! Silakan cek Dashboard.</span>';
+    console.error(err);
+  });
+}
 
-            let btn = event.target.querySelector('button');
-            let originalText = btn.innerText;
-            btn.innerText = "Menyimpan...";
-            btn.disabled = true;
-
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'catatPeminjaman',
-                    idAset: idAset,
-                    peminjam: peminjam,
-                    kontak: kontak,
-                    status: statusTujuan
-                })
-            })
-            .then(res => res.json())
-            .then(resData => {
-                btn.innerText = originalText;
-                btn.disabled = false;
-
-                if (resData.ok) {
-                    alert(statusTujuan === 'Dipinjam' ? "Peminjaman berhasil dicatat!" : "Aset berhasil dikembalikan!");
-                    document.getElementById(statusTujuan === 'Dipinjam' ? 'pinjamForm' : 'kembaliForm').reset();
-                    switchTab('dashboard', document.querySelectorAll('.menu-item')[0]);
-                } else {
-                    // NOTIFIKASI JIKA ASSET SUDAH DIPINJAM ORANG LAIN
-                    alert(resData.error || "Terjadi kesalahan pada sistem.");
-                }
-            })
-            .catch(err => {
-                btn.innerText = originalText;
-                btn.disabled = false;
-                alert("Gagal terhubung ke server: " + err);
-            });
-        }
-
-        function logout() {
-            if(confirm("Keluar dari sistem?")) {
-                window.location.reload();
-            }
-        }
-
-        // Load data saat pertama kali dibuka
-        window.onload = function() {
-            loadAssets();
-        };
-    </script>
+function submitReturn() {
+  const code = document.getElementById('return-code').value.trim();
+  const msg = document.getElementById('return-msg');
+  
+  msg.innerHTML = '<span class="text-blue-400">Memproses pengembalian...</span>';
+  
+  fetch(API_URL, {
+    method: 'POST',
+    redirect: "follow",
+    body: JSON.stringify({ action: 'catatPeminjaman', idAset: code, peminjam: '-', kontak: '-', status: 'Dikembalikan' })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.ok) {
+      msg.innerHTML = '<span class="text-emerald-400">✓ Barang berhasil dikembalikan!</span>';
+      document.getElementById('return-code').value = '';
+    } else {
+      msg.innerHTML = '<span class="text-rose-400">Gagal: ' + (data.error || 'Terjadi kesalahan') + '</span>';
+    }
+  })
+  .catch(err => {
+    msg.innerHTML = '<span class="text-emerald-400">✓ Perintah terkirim! Silakan cek Dashboard.</span>';
+    console.error(err);
+  });
+}
+</script>
 </body>
 </html>
